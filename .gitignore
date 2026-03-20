@@ -1,0 +1,6 @@
+node_modules/
+dist/
+server/words.db
+.env
+.DS_Store
+*.log
