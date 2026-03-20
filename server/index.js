@@ -29,11 +29,12 @@ app.post('/api/words', (req, res) => {
   if (!german?.trim() || !ukrainian?.trim()) {
     return res.status(400).json({ error: 'German and Ukrainian fields are required.' });
   }
+  const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
   const result = db
     .prepare(
-      'INSERT INTO words (german, ukrainian, difficulty, module, dateAdded) VALUES (?, ?, ?, ?, datetime("now"))'
+      'INSERT INTO words (german, ukrainian, difficulty, module, dateAdded) VALUES (?, ?, ?, ?, ?)'
     )
-    .run(german.trim(), ukrainian.trim(), difficulty, mod.trim());
+    .run(german.trim(), ukrainian.trim(), difficulty, mod.trim(), now);
   const word = db.prepare('SELECT * FROM words WHERE id = ?').get(result.lastInsertRowid);
   res.status(201).json(word);
 });
@@ -65,13 +66,14 @@ app.post('/api/words/bulk', (req, res) => {
   if (!Array.isArray(words) || words.length === 0) {
     return res.status(400).json({ error: 'words array is required.' });
   }
+  const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
   const insert = db.prepare(
-    'INSERT INTO words (german, ukrainian, difficulty, module, dateAdded) VALUES (?, ?, ?, ?, datetime("now"))'
+    'INSERT INTO words (german, ukrainian, difficulty, module, dateAdded) VALUES (?, ?, ?, ?, ?)'
   );
   const insertMany = db.transaction((list) => {
     for (const w of list) {
       if (w.german?.trim() && w.ukrainian?.trim()) {
-        insert.run(w.german.trim(), w.ukrainian.trim(), w.difficulty || 'medium', w.module || 'General');
+        insert.run(w.german.trim(), w.ukrainian.trim(), w.difficulty || 'medium', w.module || 'General', now);
       }
     }
   });

@@ -16,8 +16,9 @@ db.exec(`
 
 const count = db.prepare('SELECT COUNT(*) as count FROM words').get();
 if (count.count === 0) {
+  const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
   const insert = db.prepare(
-    'INSERT INTO words (german, ukrainian, difficulty, module, dateAdded) VALUES (?, ?, ?, ?, datetime("now"))'
+    'INSERT INTO words (german, ukrainian, difficulty, module, dateAdded) VALUES (?, ?, ?, ?, ?)'
   );
 
   const seedData = [
@@ -79,7 +80,7 @@ if (count.count === 0) {
   ];
 
   const insertMany = db.transaction((words) => {
-    for (const w of words) insert.run(...w);
+    for (const w of words) insert.run(...w, now);
   });
   insertMany(seedData);
   console.log(`Seeded database with ${seedData.length} words.`);
