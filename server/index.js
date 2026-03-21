@@ -15,7 +15,8 @@ const normalize = (row) => {
   return { ...rest, dateAdded: date_added };
 };
 
-if (process.env.NODE_ENV === 'production') {
+// Serve static files in local production mode (Vercel handles this in deployment)
+if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
   app.use(express.static(path.join(__dirname, '../dist')));
 }
 
@@ -129,15 +130,22 @@ app.post('/api/words/bulk', async (req, res) => {
   res.json({ success: true });
 });
 
-// ── SPA fallback ──────────────────────────────────────────────────────────────
-if (process.env.NODE_ENV === 'production') {
+// ── SPA fallback (local only — Vercel serves dist/ directly) ──────────────────
+if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../dist/index.html'));
   });
 }
 
-// ── Start ─────────────────────────────────────────────────────────────────────
-app.listen(PORT, async () => {
-  console.log(`Server running → http://localhost:${PORT}`);
-  await seedIfEmpty();
-});
+// ── Seed on module load (covers both local start and Vercel cold starts) ──────
+seedIfEmpty().catch(console.error);
+
+// ── Local dev server (not used on Vercel) ─────────────────────────────────────
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server running → http://localhost:${PORT}`);
+  });
+}
+
+// Export for Vercel serverless
+module.exports = app;
