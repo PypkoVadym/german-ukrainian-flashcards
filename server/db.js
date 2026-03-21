@@ -1,89 +1,87 @@
-const Database = require('better-sqlite3');
-const path = require('path');
+require('dotenv').config();
+const { createClient } = require('@supabase/supabase-js');
 
-const db = new Database(path.join(__dirname, 'words.db'));
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+);
 
-db.exec(`
-  CREATE TABLE IF NOT EXISTS words (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    german TEXT NOT NULL,
-    ukrainian TEXT NOT NULL,
-    difficulty TEXT NOT NULL DEFAULT 'medium' CHECK(difficulty IN ('easy', 'medium', 'hard')),
-    module TEXT NOT NULL DEFAULT 'General',
-    dateAdded TEXT NOT NULL DEFAULT (datetime('now'))
-  )
-`);
+const seedData = [
+  // Greetings
+  { german: 'Hallo', ukrainian: 'Привіт', difficulty: 'easy', module: 'Greetings' },
+  { german: 'Tschüss', ukrainian: 'Бувай', difficulty: 'easy', module: 'Greetings' },
+  { german: 'Guten Morgen', ukrainian: 'Доброго ранку', difficulty: 'easy', module: 'Greetings' },
+  { german: 'Guten Tag', ukrainian: 'Добрий день', difficulty: 'easy', module: 'Greetings' },
+  { german: 'Guten Abend', ukrainian: 'Доброго вечора', difficulty: 'medium', module: 'Greetings' },
+  { german: 'Danke', ukrainian: 'Дякую', difficulty: 'easy', module: 'Greetings' },
+  { german: 'Bitte', ukrainian: 'Будь ласка', difficulty: 'easy', module: 'Greetings' },
+  { german: 'Ja', ukrainian: 'Так', difficulty: 'easy', module: 'Greetings' },
+  { german: 'Nein', ukrainian: 'Ні', difficulty: 'easy', module: 'Greetings' },
+  { german: 'Entschuldigung', ukrainian: 'Вибачте', difficulty: 'medium', module: 'Greetings' },
+  // Numbers
+  { german: 'eins', ukrainian: 'один', difficulty: 'easy', module: 'Numbers' },
+  { german: 'zwei', ukrainian: 'два', difficulty: 'easy', module: 'Numbers' },
+  { german: 'drei', ukrainian: 'три', difficulty: 'easy', module: 'Numbers' },
+  { german: 'vier', ukrainian: 'чотири', difficulty: 'easy', module: 'Numbers' },
+  { german: 'fünf', ukrainian: "п'ять", difficulty: 'easy', module: 'Numbers' },
+  { german: 'sechs', ukrainian: 'шість', difficulty: 'easy', module: 'Numbers' },
+  { german: 'sieben', ukrainian: 'сім', difficulty: 'easy', module: 'Numbers' },
+  { german: 'acht', ukrainian: 'вісім', difficulty: 'easy', module: 'Numbers' },
+  { german: 'neun', ukrainian: "дев'ять", difficulty: 'easy', module: 'Numbers' },
+  { german: 'zehn', ukrainian: 'десять', difficulty: 'easy', module: 'Numbers' },
+  // Colors
+  { german: 'rot', ukrainian: 'червоний', difficulty: 'easy', module: 'Colors' },
+  { german: 'blau', ukrainian: 'синій', difficulty: 'easy', module: 'Colors' },
+  { german: 'grün', ukrainian: 'зелений', difficulty: 'easy', module: 'Colors' },
+  { german: 'gelb', ukrainian: 'жовтий', difficulty: 'easy', module: 'Colors' },
+  { german: 'schwarz', ukrainian: 'чорний', difficulty: 'easy', module: 'Colors' },
+  { german: 'weiß', ukrainian: 'білий', difficulty: 'easy', module: 'Colors' },
+  { german: 'orange', ukrainian: 'оранжевий', difficulty: 'medium', module: 'Colors' },
+  { german: 'grau', ukrainian: 'сірий', difficulty: 'medium', module: 'Colors' },
+  { german: 'braun', ukrainian: 'коричневий', difficulty: 'medium', module: 'Colors' },
+  { german: 'rosa', ukrainian: 'рожевий', difficulty: 'medium', module: 'Colors' },
+  // Food
+  { german: 'Brot', ukrainian: 'хліб', difficulty: 'easy', module: 'Food' },
+  { german: 'Wasser', ukrainian: 'вода', difficulty: 'easy', module: 'Food' },
+  { german: 'Milch', ukrainian: 'молоко', difficulty: 'easy', module: 'Food' },
+  { german: 'Apfel', ukrainian: 'яблуко', difficulty: 'easy', module: 'Food' },
+  { german: 'Käse', ukrainian: 'сир', difficulty: 'medium', module: 'Food' },
+  { german: 'Ei', ukrainian: 'яйце', difficulty: 'easy', module: 'Food' },
+  { german: 'Fleisch', ukrainian: "м'ясо", difficulty: 'medium', module: 'Food' },
+  { german: 'Fisch', ukrainian: 'риба', difficulty: 'easy', module: 'Food' },
+  { german: 'Reis', ukrainian: 'рис', difficulty: 'easy', module: 'Food' },
+  { german: 'Suppe', ukrainian: 'суп', difficulty: 'easy', module: 'Food' },
+  // Animals
+  { german: 'Hund', ukrainian: 'собака', difficulty: 'easy', module: 'Animals' },
+  { german: 'Katze', ukrainian: 'кішка', difficulty: 'easy', module: 'Animals' },
+  { german: 'Vogel', ukrainian: 'птах', difficulty: 'easy', module: 'Animals' },
+  { german: 'Pferd', ukrainian: 'кінь', difficulty: 'medium', module: 'Animals' },
+  { german: 'Kuh', ukrainian: 'корова', difficulty: 'easy', module: 'Animals' },
+  { german: 'Schwein', ukrainian: 'свиня', difficulty: 'medium', module: 'Animals' },
+  { german: 'Maus', ukrainian: 'миша', difficulty: 'easy', module: 'Animals' },
+  { german: 'Bär', ukrainian: 'ведмідь', difficulty: 'medium', module: 'Animals' },
+  { german: 'Hase', ukrainian: 'заєць', difficulty: 'medium', module: 'Animals' },
+  { german: 'Löwe', ukrainian: 'лев', difficulty: 'hard', module: 'Animals' },
+];
 
-const count = db.prepare('SELECT COUNT(*) as count FROM words').get();
-if (count.count === 0) {
-  const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
-  const insert = db.prepare(
-    'INSERT INTO words (german, ukrainian, difficulty, module, dateAdded) VALUES (?, ?, ?, ?, ?)'
-  );
+async function seedIfEmpty() {
+  const { count, error } = await supabase
+    .from('words')
+    .select('*', { count: 'exact', head: true });
 
-  const seedData = [
-    // Greetings
-    ['Hallo', 'Привіт', 'easy', 'Greetings'],
-    ['Tschüss', 'Бувай', 'easy', 'Greetings'],
-    ['Guten Morgen', 'Доброго ранку', 'easy', 'Greetings'],
-    ['Guten Tag', 'Добрий день', 'easy', 'Greetings'],
-    ['Guten Abend', 'Доброго вечора', 'medium', 'Greetings'],
-    ['Danke', 'Дякую', 'easy', 'Greetings'],
-    ['Bitte', 'Будь ласка', 'easy', 'Greetings'],
-    ['Ja', 'Так', 'easy', 'Greetings'],
-    ['Nein', 'Ні', 'easy', 'Greetings'],
-    ['Entschuldigung', 'Вибачте', 'medium', 'Greetings'],
-    // Numbers
-    ['eins', 'один', 'easy', 'Numbers'],
-    ['zwei', 'два', 'easy', 'Numbers'],
-    ['drei', 'три', 'easy', 'Numbers'],
-    ['vier', 'чотири', 'easy', 'Numbers'],
-    ['fünf', "п'ять", 'easy', 'Numbers'],
-    ['sechs', 'шість', 'easy', 'Numbers'],
-    ['sieben', 'сім', 'easy', 'Numbers'],
-    ['acht', 'вісім', 'easy', 'Numbers'],
-    ['neun', "дев'ять", 'easy', 'Numbers'],
-    ['zehn', 'десять', 'easy', 'Numbers'],
-    // Colors
-    ['rot', 'червоний', 'easy', 'Colors'],
-    ['blau', 'синій', 'easy', 'Colors'],
-    ['grün', 'зелений', 'easy', 'Colors'],
-    ['gelb', 'жовтий', 'easy', 'Colors'],
-    ['schwarz', 'чорний', 'easy', 'Colors'],
-    ['weiß', 'білий', 'easy', 'Colors'],
-    ['orange', 'оранжевий', 'medium', 'Colors'],
-    ['grau', 'сірий', 'medium', 'Colors'],
-    ['braun', 'коричневий', 'medium', 'Colors'],
-    ['rosa', 'рожевий', 'medium', 'Colors'],
-    // Food
-    ['Brot', 'хліб', 'easy', 'Food'],
-    ['Wasser', 'вода', 'easy', 'Food'],
-    ['Milch', 'молоко', 'easy', 'Food'],
-    ['Apfel', 'яблуко', 'easy', 'Food'],
-    ['Käse', 'сир', 'medium', 'Food'],
-    ['Ei', 'яйце', 'easy', 'Food'],
-    ['Fleisch', "м'ясо", 'medium', 'Food'],
-    ['Fisch', 'риба', 'easy', 'Food'],
-    ['Reis', 'рис', 'easy', 'Food'],
-    ['Suppe', 'суп', 'easy', 'Food'],
-    // Animals
-    ['Hund', 'собака', 'easy', 'Animals'],
-    ['Katze', 'кішка', 'easy', 'Animals'],
-    ['Vogel', 'птах', 'easy', 'Animals'],
-    ['Pferd', 'кінь', 'medium', 'Animals'],
-    ['Kuh', 'корова', 'easy', 'Animals'],
-    ['Schwein', 'свиня', 'medium', 'Animals'],
-    ['Maus', 'миша', 'easy', 'Animals'],
-    ['Bär', 'ведмідь', 'medium', 'Animals'],
-    ['Hase', 'заєць', 'medium', 'Animals'],
-    ['Löwe', 'лев', 'hard', 'Animals'],
-  ];
+  if (error) {
+    console.error('Error checking seed status:', error.message);
+    return;
+  }
 
-  const insertMany = db.transaction((words) => {
-    for (const w of words) insert.run(...w, now);
-  });
-  insertMany(seedData);
-  console.log(`Seeded database with ${seedData.length} words.`);
+  if (count === 0) {
+    const { error: insertError } = await supabase.from('words').insert(seedData);
+    if (insertError) {
+      console.error('Seed error:', insertError.message);
+    } else {
+      console.log(`Seeded database with ${seedData.length} words.`);
+    }
+  }
 }
 
-module.exports = db;
+module.exports = { supabase, seedIfEmpty };
