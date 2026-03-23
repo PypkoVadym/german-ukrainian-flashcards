@@ -16,7 +16,7 @@ export default function Home({ navigate, SCREENS }) {
           <span className="flags-arrow">⇄</span>
           <span>🇺🇦</span>
         </div>
-        <h1 className="home-title">Deutsch&nbsp;↔&nbsp;Українська</h1>
+        <h1 className="home-title">Deutsch ↔ Українська</h1>
         <p className="home-subtitle">
           Learn German vocabulary with Ukrainian translations through interactive flashcards.
         </p>

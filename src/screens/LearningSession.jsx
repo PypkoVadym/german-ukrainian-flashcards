@@ -33,9 +33,11 @@ export default function LearningSession({ navigate, SCREENS, words, config }) {
 
   useEffect(() => {
     if (cardState === 'idle') {
-      inputRef.current?.focus();
+      // Small delay ensures DOM is ready; works on iOS Safari
+      const t = setTimeout(() => inputRef.current?.focus(), 50);
+      return () => clearTimeout(t);
     }
-  }, [cardState]);
+  }, [cardState, index]);
 
   const submit = useCallback(() => {
     if (cardState !== 'idle' || !input.trim()) return;
@@ -152,7 +154,10 @@ export default function LearningSession({ navigate, SCREENS, words, config }) {
           disabled={cardState === 'correct' || cardState === 'exiting'}
           autoComplete="off"
           autoCorrect="off"
+          autoCapitalize="none"
           spellCheck={false}
+          inputMode="text"
+          autoFocus
         />
         <div className="session-actions">
           {!wrongReveal ? (
