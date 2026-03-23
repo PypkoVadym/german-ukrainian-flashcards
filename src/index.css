@@ -507,10 +507,11 @@ select.input { cursor: pointer; }
 .session-screen {
   display: flex;
   flex-direction: column;
-  min-height: 100dvh;
+  height: 100dvh;
   padding: 20px 20px 0;
   max-width: 600px;
   margin: 0 auto;
+  overflow: hidden;
 }
 
 .session-header {
@@ -551,7 +552,7 @@ select.input { cursor: pointer; }
   justify-content: center;
   flex: 1;
   min-height: 0;
-  margin-bottom: 20px;
+  padding: 8px 0;
 }
 
 .flashcard {
@@ -625,11 +626,9 @@ select.input { cursor: pointer; }
   display: flex;
   flex-direction: column;
   gap: 12px;
-  position: sticky;
-  bottom: 0;
+  flex-shrink: 0;
+  padding: 12px 0 max(env(safe-area-inset-bottom, 0px), 20px);
   background: var(--bg);
-  padding: 12px 0 max(env(safe-area-inset-bottom, 0px), 24px);
-  z-index: 10;
 }
 
 .answer-input {
@@ -986,20 +985,14 @@ select.input { cursor: pointer; }
 
   /* Session */
   .session-screen { padding: 14px 16px 0; }
-  .session-header { margin-bottom: 16px; }
-  .flashcard-wrap {
-    flex: unset;
-    margin-bottom: 16px;
-    align-items: flex-start;
-  }
-  .flashcard { padding: 24px 18px; }
+  .session-header { margin-bottom: 12px; }
+  .flashcard-wrap { padding: 4px 0; }
+  .flashcard { padding: 22px 18px; }
   .card-word { font-size: 1.9rem; }
-  .card-meta { margin-bottom: 16px; }
+  .card-meta { margin-bottom: 14px; }
   .session-input-area {
-    margin: 0 -16px;
-    padding: 12px 16px max(env(safe-area-inset-bottom, 0px), 20px);
+    padding: 10px 0 max(env(safe-area-inset-bottom, 0px), 16px);
     border-top: 1px solid var(--border);
-    background: var(--bg);
   }
   .answer-input { font-size: 1rem; }
 
