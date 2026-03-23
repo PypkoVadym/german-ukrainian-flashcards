@@ -71,10 +71,7 @@ export default function LearningSession({ navigate, SCREENS, words, config }) {
     } else {
       setCardState('incorrect');
       setWrongReveal(input.trim());
-      setTimeout(() => {
-        setCardState('idle');
-        inputRef.current?.focus();
-      }, 500);
+      setTimeout(() => setCardState('idle'), 500);
     }
   }, [cardState, input, answer, current, index, words, results, navigate, SCREENS]);
 
@@ -166,17 +163,13 @@ export default function LearningSession({ navigate, SCREENS, words, config }) {
           {!wrongReveal ? (
             <button
               className="btn btn-primary btn-full"
-              onPointerDown={(e) => e.preventDefault()}
               onClick={submit}
               disabled={!input.trim() || cardState === 'correct' || cardState === 'exiting'}
             >
               Submit
             </button>
           ) : (
-            <button
-              className="btn btn-secondary btn-full"
-              onClick={() => { next(); setTimeout(() => inputRef.current?.focus(), 50); }}
-            >
+            <button className="btn btn-secondary btn-full" onClick={next}>
               Next →
             </button>
           )}
