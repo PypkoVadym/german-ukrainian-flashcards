@@ -38,12 +38,14 @@ export default function SessionConfig({ navigate, SCREENS }) {
   const [modules, setModules] = useState(new Set());
   const [modulesOpen, setModulesOpen] = useState(false);
   const [difficulties, setDifficulties] = useState(new Set(['easy', 'medium', 'hard']));
-  const [dateRange, setDateRange] = useState('all'); // 'all' | '7d' | '30d' | '90d'
+  const [dateBatches, setDateBatches] = useState(new Set());
 
   useEffect(() => {
     api.getWords().then((ws) => {
       setWords(ws);
       setModules(new Set(ws.map((w) => w.module)));
+      const dates = [...new Set(ws.map((w) => w.dateAdded?.slice(0, 10)))].filter(Boolean).sort();
+      setDateBatches(new Set(dates));
       setLoading(false);
     });
   }, []);
@@ -66,16 +68,20 @@ export default function SessionConfig({ navigate, SCREENS }) {
     });
   };
 
-  const dateThreshold = dateRange === 'all' ? null : (() => {
-    const d = new Date();
-    d.setDate(d.getDate() - { '7d': 7, '30d': 30, '90d': 90 }[dateRange]);
-    return d;
-  })();
+  const allDates = [...new Set(words.map((w) => w.dateAdded?.slice(0, 10)))].filter(Boolean).sort();
+
+  const toggleDate = (d) => {
+    setDateBatches((prev) => {
+      const next = new Set(prev);
+      next.has(d) ? next.delete(d) : next.add(d);
+      return next;
+    });
+  };
 
   const filtered = words.filter((w) => {
     if (!modules.has(w.module)) return false;
     if (!difficulties.has(w.difficulty)) return false;
-    if (dateThreshold && new Date(w.dateAdded) < dateThreshold) return false;
+    if (!dateBatches.has(w.dateAdded?.slice(0, 10))) return false;
     return true;
   });
   const canStart = filtered.length >= 10;
@@ -183,18 +189,13 @@ export default function SessionConfig({ navigate, SCREENS }) {
           <div className="config-section">
             <div className="section-label">Date Added</div>
             <div className="date-range-row">
-              {[
-                { value: 'all', label: 'All time' },
-                { value: '7d',  label: 'Last 7 days' },
-                { value: '30d', label: 'Last 30 days' },
-                { value: '90d', label: 'Last 3 months' },
-              ].map(({ value, label }) => (
+              {allDates.map((d) => (
                 <div
-                  key={value}
-                  className={`date-chip ${dateRange === value ? 'checked' : ''}`}
-                  onClick={() => setDateRange(value)}
+                  key={d}
+                  className={`date-chip ${dateBatches.has(d) ? 'checked' : ''}`}
+                  onClick={() => toggleDate(d)}
                 >
-                  {label}
+                  {new Date(d + 'T00:00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
                 </div>
               ))}
             </div>
