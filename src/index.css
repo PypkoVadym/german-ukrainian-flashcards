@@ -514,6 +514,30 @@ select.input { cursor: pointer; }
 .diff-check { opacity: 0; transition: opacity 0.15s; }
 .diff-chip.checked .diff-check { opacity: 1; }
 
+.date-range-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.date-chip {
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+.date-chip:hover { border-color: var(--primary); color: var(--primary); }
+.date-chip.checked {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
 .word-count-bar {
   margin: 20px 0;
   padding: 14px 18px;

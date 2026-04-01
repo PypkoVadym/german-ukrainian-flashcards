@@ -38,6 +38,7 @@ export default function SessionConfig({ navigate, SCREENS }) {
   const [modules, setModules] = useState(new Set());
   const [modulesOpen, setModulesOpen] = useState(false);
   const [difficulties, setDifficulties] = useState(new Set(['easy', 'medium', 'hard']));
+  const [dateRange, setDateRange] = useState('all'); // 'all' | '7d' | '30d' | '90d'
 
   useEffect(() => {
     api.getWords().then((ws) => {
@@ -65,9 +66,18 @@ export default function SessionConfig({ navigate, SCREENS }) {
     });
   };
 
-  const filtered = words.filter(
-    (w) => modules.has(w.module) && difficulties.has(w.difficulty)
-  );
+  const dateThreshold = dateRange === 'all' ? null : (() => {
+    const d = new Date();
+    d.setDate(d.getDate() - { '7d': 7, '30d': 30, '90d': 90 }[dateRange]);
+    return d;
+  })();
+
+  const filtered = words.filter((w) => {
+    if (!modules.has(w.module)) return false;
+    if (!difficulties.has(w.difficulty)) return false;
+    if (dateThreshold && new Date(w.dateAdded) < dateThreshold) return false;
+    return true;
+  });
   const canStart = filtered.length >= 10;
 
   const startSession = () => {
@@ -166,6 +176,27 @@ export default function SessionConfig({ navigate, SCREENS }) {
                   </div>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Date Added */}
+          <div className="config-section">
+            <div className="section-label">Date Added</div>
+            <div className="date-range-row">
+              {[
+                { value: 'all', label: 'All time' },
+                { value: '7d',  label: 'Last 7 days' },
+                { value: '30d', label: 'Last 30 days' },
+                { value: '90d', label: 'Last 3 months' },
+              ].map(({ value, label }) => (
+                <div
+                  key={value}
+                  className={`date-chip ${dateRange === value ? 'checked' : ''}`}
+                  onClick={() => setDateRange(value)}
+                >
+                  {label}
+                </div>
+              ))}
             </div>
           </div>
 
