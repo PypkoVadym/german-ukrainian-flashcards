@@ -7,14 +7,36 @@ const MODULE_COLORS = {
   Colors: '#EC4899',
   Food: '#10B981',
   Animals: '#F59E0B',
+  Travel: '#EF4444',
+  Body: '#F97316',
+  Clothes: '#14B8A6',
+  Weather: '#06B6D4',
+  Time: '#A855F7',
+  Family: '#E11D48',
+  Home: '#84CC16',
+  Work: '#0EA5E9',
+  Sports: '#FB923C',
+  Nature: '#22C55E',
 };
-const modColor = (m) => MODULE_COLORS[m] || '#6B7280';
+
+const FALLBACK_COLORS = [
+  '#3B82F6','#8B5CF6','#EC4899','#10B981','#F59E0B',
+  '#EF4444','#F97316','#14B8A6','#06B6D4','#A855F7',
+  '#E11D48','#84CC16','#0EA5E9','#FB923C','#22C55E',
+];
+
+const modColor = (m, allModules) => {
+  if (MODULE_COLORS[m]) return MODULE_COLORS[m];
+  const idx = allModules.indexOf(m);
+  return FALLBACK_COLORS[idx % FALLBACK_COLORS.length];
+};
 
 export default function SessionConfig({ navigate, SCREENS }) {
   const [words, setWords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [direction, setDirection] = useState('de-uk'); // 'de-uk' | 'uk-de'
   const [modules, setModules] = useState(new Set());
+  const [modulesOpen, setModulesOpen] = useState(false);
   const [difficulties, setDifficulties] = useState(new Set(['easy', 'medium', 'hard']));
 
   useEffect(() => {
@@ -92,27 +114,39 @@ export default function SessionConfig({ navigate, SCREENS }) {
 
           {/* Modules */}
           <div className="config-section">
-            <div className="section-label">Modules</div>
-            <div className="module-grid">
-              {allModules.map((m) => {
-                const checked = modules.has(m);
-                return (
-                  <div
-                    key={m}
-                    className={`module-chip ${checked ? 'checked' : ''}`}
-                    style={{ color: checked ? modColor(m) : undefined }}
-                    onClick={() => toggleModule(m)}
-                  >
+            <button
+              className="modules-dropdown-toggle"
+              onClick={() => setModulesOpen((o) => !o)}
+            >
+              <span className="section-label" style={{ margin: 0 }}>Modules</span>
+              <span className="modules-dropdown-meta">
+                {modules.size}/{allModules.length} selected
+                <span className={`modules-dropdown-arrow ${modulesOpen ? 'open' : ''}`}>▾</span>
+              </span>
+            </button>
+            {modulesOpen && (
+              <div className="module-grid">
+                {allModules.map((m) => {
+                  const checked = modules.has(m);
+                  const color = modColor(m, allModules);
+                  return (
                     <div
-                      className="module-chip-dot"
-                      style={{ background: modColor(m) }}
-                    />
-                    {m}
-                    <span className="module-check">✓</span>
-                  </div>
-                );
-              })}
-            </div>
+                      key={m}
+                      className={`module-chip ${checked ? 'checked' : ''}`}
+                      style={{ color: checked ? color : undefined }}
+                      onClick={() => toggleModule(m)}
+                    >
+                      <div
+                        className="module-chip-dot"
+                        style={{ background: color }}
+                      />
+                      {m}
+                      <span className="module-check">✓</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Difficulty */}

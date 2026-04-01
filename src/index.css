@@ -421,6 +421,35 @@ select.input { cursor: pointer; }
 
 .config-section { margin-bottom: 28px; }
 
+.modules-dropdown-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  margin-bottom: 0;
+  transition: border-color 0.15s;
+}
+.modules-dropdown-toggle:hover { border-color: var(--primary); }
+.modules-dropdown-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.modules-dropdown-arrow {
+  font-size: 1rem;
+  transition: transform 0.2s;
+  display: inline-block;
+}
+.modules-dropdown-arrow.open { transform: rotate(180deg); }
+.config-section .module-grid { margin-top: 8px; }
+
 .module-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
